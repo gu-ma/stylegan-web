@@ -281,9 +281,13 @@ def project():
 def main(argv):
 	global model_name
 	model_name = argv[1] if len(argv) > 1 else os.environ.get('MODEL_NAME')
+	
+	crt_path = os.environ.get('SSL_CERT_PATH')
+	key_path = os.environ.get('SSL_KEY_PATH')
+	context = (crt_path, key_path) if crt_path and key_path else None
 
 	try:
-		app.run(port = int(os.getenv('HTTP_PORT')), host = os.getenv('HTTP_HOST'), threaded = False)
+		app.run(port = int(os.getenv('HTTP_PORT')), host = os.getenv('HTTP_HOST'), threaded = False, ssl_context=context)
 	except:
 		print('server interrupted:', sys.exc_info())
 

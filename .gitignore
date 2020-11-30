@@ -12,3 +12,6 @@ example.png
 #documents
 *.log
 .vscode/
+.cache
+*.crt
+*.key
