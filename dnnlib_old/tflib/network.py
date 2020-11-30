@@ -275,7 +275,7 @@ class Network:
             state = handler(state)
 
         # Set basic fields.
-        assert state["version"] in [2, 3, 4]
+        assert state["version"] in [2, 3, 4, 5]
         self.name = state["name"]
         self.static_kwargs = util.EasyDict(state["static_kwargs"])
         self.components = util.EasyDict(state.get("components", {}))
