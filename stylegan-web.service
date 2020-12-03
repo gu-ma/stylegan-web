@@ -1,0 +1,13 @@
+[Unit]
+    Description=StyleGAN2 web server
+[Service]
+    Type=simple
+    PIDFile=/var/run/stylegan-web.pid
+    Environment="PATH=/usr/local/cuda-10.1/bin:/home/user/anaconda3/bin:/home/user/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin"
+    ExecStart=/home/user/anaconda3/envs/stylegan-web/bin/python ./http_server.py
+    User=user
+    Group=user
+    WorkingDirectory=/home/user/documents/stylegan-web/
+[Install]
+    WantedBy=multi-user.target
+
