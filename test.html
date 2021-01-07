@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Example</title>
+</head>
+
+<body>
+
+    <script type="module">
+    import * as LatentCode from "./app/latentCode.js"
+
+    // Change to your server IP / PORT
+    const url = "https://172.17.0.2:8186"
+    const randomize_noise = 0
+    let x, y, features
+    const start = new Date()
+
+    let getImg = () => {
+        const features1 = features.map((num, index) =>
+            index % 2 == 0
+                ? num * Math.sin((new Date() - start - index) / 8000)
+                : num * Math.cos((new Date() - start - index) / 4000)
+        )
+        const latentsBytes = LatentCode.encodeFloat32(features1)
+        const latentStr = `latents=${encodeURIComponent(latentsBytes)}`
+        const psi = (x / 1024) * 4 - 2
+        const img_url = `${url}/generate?psi=${psi}&randomize_noise=${randomize_noise}&${latentStr}`
+        img.src = img_url
+    }
+
+    onmousedown = e => {
+        features = Array(512)
+            .fill()
+            .map(() => LatentCode.randn_bm() * 10 - 5)
+        x = e.clientX
+        y = e.clientY
+    }
+
+    setInterval(getImg, 100)
+
+    </script>
+
+    <img id='img'>
+
+</body>
+
+</html>
