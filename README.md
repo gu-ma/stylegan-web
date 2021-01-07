@@ -1,3 +1,58 @@
+# Added
+
+## 1) SG2ADA as submodule
+Init the submodule and link to it:
+
+```.bash
+git submodule --init reccursive
+ln -s stylegan2-ada/dnnlib dnnlib
+```
+
+## 2) Pyvips
+For faster image encoding. See [installation info](https://github.com/libvips/pyvips)
+
+## 3) Docker
+
+Build the image
+```.bash
+docker build --tag styleganweb:latest .
+```
+
+Generate self signed certificate (to run locally, otherwise you can use [cerbot](https://certbot.eff.org/) to generate one)
+```.bash
+openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out stylegan-web.crt -keyout stylegan-web.key
+```
+
+Run server
+```.bash
+chmod +x run_docker.sh
+```
+
+## 4) Run as service (Ubuntu)
+
+Adjust the service file `stylegan-web.service` as needed (Environment, ExecStart, WorkingDirectory, etc...)
+Copy it to `/lib/systemd/system/`
+
+Load and start the service:
+```
+sudo systemctl daemon-reload
+sudo systemctl start stylegan-web
+```
+
+Check if it's running:
+```
+sudo systemctl status stylegan-web
+```
+
+Enable it so that the service start on boot
+```
+sudo systemctl enable stylegan-web
+```
+
+
+---
+## Original readme
+
 [![Explorer Demo](./documents/explorer-demo.gif)](https://www.youtube.com/watch?v=6cCjX24hKwo)
 
 This project is a web porting for [NVlabs' StyleGAN2](https://github.com/NVlabs/stylegan2), to facilitate exploring all kinds characteristic of StyleGAN networks.
