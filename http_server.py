@@ -5,6 +5,7 @@ import io
 import time
 from dotenv import load_dotenv
 import flask
+from flask_cors import CORS
 import pickle
 import PIL.Image
 import base64
@@ -20,6 +21,8 @@ from training import misc
 from projector import Projector
 import latentCode
 
+import base64
+import pyvips
 
 
 load_dotenv(dotenv_path = './.env.local')
@@ -122,6 +125,7 @@ def loadProjector():
 
 
 app = flask.Flask(__name__, static_url_path = '', static_folder = './static')
+CORS(app)
 
 
 DIST_DIR = './dist'
@@ -214,19 +218,46 @@ def generate():
 			if latents.shape[0] < g_dLatentsIn.shape[0]:
 				latents = np.tile(latents, g_dLatentsIn.shape[0] // latents.shape[0])
 			images = dnnlib.tflib.run(synthesis, {g_dLatentsIn: latents})
-			image = misc.convert_to_pil_image(misc.create_image_grid(images), drange = [-1,1])
+			image = images[0].transpose(1, 2, 0)
+			image = misc.adjust_dynamic_range(image, [-1,1], [0,255])
+			image = np.rint(image).clip(0, 255).astype(np.uint8)
+			# image = misc.convert_to_pil_image(misc.create_image_grid(images), drange = [-1,1])
 		else:
 			latents = latents.reshape([1, latent_len])
 			images = gs.run(latents, None, truncation_psi = psi, randomize_noise = randomize_noise != 0, output_transform = fmt)
-			image = PIL.Image.fromarray(images[0], 'RGB')
+			image = images[0]
+			# image = PIL.Image.fromarray(images[0], 'RGB')
 
-	print('generation cost:', time.time() - t0)
 
 	# encode to PNG
-	fp = io.BytesIO()
-	image.save(fp, PIL.Image.registered_extensions()['.png'])
+	# fp = io.BytesIO()
+	# image.save(fp, PIL.Image.registered_extensions()['.png'])
+	# data = fp.getValue()
 
-	return flask.Response(fp.getvalue(), mimetype = 'image/png')
+	# Convert Numpy array to Vips image
+	dtype_to_format = {
+		'uint8': 'uchar',
+		'int8': 'char',
+		'uint16': 'ushort',
+		'int16': 'short',
+		'uint32': 'uint',
+		'int32': 'int',
+		'float32': 'float',
+		'float64': 'double',
+		'complex64': 'complex',
+		'complex128': 'dpcomplex',
+	}
+	height, width, bands = image.shape
+	linear = image.reshape(width * height * bands)
+	vi = pyvips.Image.new_from_memory(linear.data, width, height, bands,dtype_to_format[str(image.dtype)])
+	# Save to memory buffer as PNG
+	# compression = 0
+	# data = vi.write_to_buffer(f".png[compression={compression}]")
+	# Save to memory buffer as JPG
+	data = vi.write_to_buffer(".jpg")
+
+	print('generation cost:', time.time() - t0)
+	return flask.Response(data, mimetype = 'image/png')
 
 
 #LPIPS_IMAGE_SHAPE = tuple(map(int, os.environ.get('LPIPS_IMAGE_SHAPE', '256,256').split(',')))

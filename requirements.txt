@@ -4,3 +4,5 @@ Flask==1.1.1
 numpy>=1.8.0
 Pillow>=6.0.0
 requests>=2.21.0
+flask_cors==3.0.9
+pyvips==2.1.14
