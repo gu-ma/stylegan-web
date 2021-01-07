@@ -25,8 +25,9 @@ openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out stylegan-web.cr
 
 Run server
 ```.bash
-chmod +x run_docker.sh
+./run_docker.sh
 ```
+You might need to change the file permissions using `chmod +x run_docker.sh`
 
 ## 4) Run as service (Ubuntu)
 
