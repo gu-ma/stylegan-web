@@ -226,6 +226,7 @@ def generate():
 			latents = latents.reshape([1, latent_len])
 			images = gs.run(latents, None, truncation_psi = psi, randomize_noise = randomize_noise != 0, output_transform = fmt)
 			image = images[0]
+			t1 = time.time()
 			# image = PIL.Image.fromarray(images[0], 'RGB')
 
 
@@ -249,14 +250,16 @@ def generate():
 	}
 	height, width, bands = image.shape
 	linear = image.reshape(width * height * bands)
-	vi = pyvips.Image.new_from_memory(linear.data, width, height, bands,dtype_to_format[str(image.dtype)])
+	vi = pyvips.Image.new_from_memory(linear.data, width, height, bands, dtype_to_format[str(image.dtype)])
 	# Save to memory buffer as PNG
 	# compression = 0
 	# data = vi.write_to_buffer(f".png[compression={compression}]")
 	# Save to memory buffer as JPG
+	vi = vi.resize(2, kernel = "lanczos2")
 	data = vi.write_to_buffer(".jpg")
+	t2 = time.time()
 
-	print('generation cost:', time.time() - t0)
+	print(f'Costs:\ngenerator\t{t1 - t0}\nencoder\t\t{t2 - t1}\ntotal\t\t{t2 -t0}')
 	return flask.Response(data, mimetype = 'image/png')
 
 
