@@ -7,43 +7,72 @@
     <title>Example</title>
 </head>
 
+<style>
+    body {
+        background-color: black;
+    }
+    #label {
+        margin: 0;
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        font-family: sans-serif;
+        font-size: small;
+    }
+</style>
+
 <body>
 
     <script type="module">
-    import * as LatentCode from "./app/latentCode.js"
+        import * as LatentCode from "./app/latentCode.js"
 
-    // Change to your server IP / PORT
-    const url = "https://172.17.0.2:8186"
-    const randomize_noise = 0
-    let x, y, features
-    const start = new Date()
+        // Change to your server IP / PORT
+        const url = "https://172.17.0.2:8186"
+        const randomize_noise = 0
+        let psi, x, y, features
+        const start = new Date()
+        let label = document.getElementById('label')
 
-    let getImg = () => {
-        const features1 = features.map((num, index) =>
-            index % 2 == 0
-                ? num * Math.sin((new Date() - start - index) / 8000)
-                : num * Math.cos((new Date() - start - index) / 4000)
-        )
-        const latentsBytes = LatentCode.encodeFloat32(features1)
-        const latentStr = `latents=${encodeURIComponent(latentsBytes)}`
-        const psi = (x / 1024) * 4 - 2
-        const img_url = `${url}/generate?psi=${psi}&randomize_noise=${randomize_noise}&${latentStr}`
-        img.src = img_url
-    }
+        let getImg = () => {
+            const v1 = y / 1024
+            const v2 = x / 1024
+            const features1 = features.map((num, index) =>
+                index % 2 == 0
+                    ? num * Math.sin(((new Date() - start - index) / 8000) * v1)
+                    : num * Math.cos(((new Date() - start - index) / 4000) * v2)
+            )
+            // const v1 = ((y / 1024) - .5) * 2
+            // const v2 = ((x / 1024) - .5) * 2
+            // const features1 = features.map((num, index) =>
+            //     index % 2 == 0 ? num * Math.sin(v1) : num * Math.sin(v2)
+            // )
+            const latentsBytes = LatentCode.encodeFloat32(features1)
+            const latentStr = `latents=${encodeURIComponent(latentsBytes)}`
+            const img_url = `${url}/generate?psi=${psi}&randomize_noise=${randomize_noise}&${latentStr}`
+            img.src = img_url
+            label.innerHTML = `PSI:${psi}<br>V1:${v1}<br>V2:${v2}`
+        }
 
-    onmousedown = e => {
-        features = Array(512)
-            .fill()
-            .map(() => LatentCode.randn_bm() * 10 - 5)
-        x = e.clientX
-        y = e.clientY
-    }
+        onmousedown = e => {
+            features = Array(512)
+                .fill()
+                .map(() => LatentCode.randn_bm() * 10 - 5)
+            psi = (e.clientX / 1024) * 4 - 2
+            getImg()
+        }
 
-    setInterval(getImg, 100)
+        onmousemove = e => {
+            x = e.clientX
+            y = e.clientY
+        }
+
+        img.onload = () => getImg()
 
     </script>
 
     <img id='img'>
+    <p id='label'>Test</p>
 
 </body>
 
