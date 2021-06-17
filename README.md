@@ -4,7 +4,7 @@
 Init the submodule and link to it:
 
 ```.bash
-git submodule --init reccursive
+git submodule update --init --recursive
 ln -s stylegan2-ada/dnnlib dnnlib
 ```
 
