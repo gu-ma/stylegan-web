@@ -29,7 +29,7 @@ SSL_KEY_PATH = '<keyfile>'
 ```
 
 ### 2.4) If you need to use a DN:
-Use [cerbot](https://certbot.eff.org/) to generate a certificate
+Use [cerbot](https://certbot.eff.org/) to generate a certificate. [Freenom](https://my.freenom.com/) is a good place to register free .tk domains
 
 ## 3) Run
 
@@ -40,15 +40,16 @@ Use [cerbot](https://certbot.eff.org/) to generate a certificate
 docker build --tag styleganweb:latest .
 ```
 
-#### 3.1.2) Allow access through firewall (Ubuntu)
-```.bash
-sudo ufw allow 8186
-```
-
-#### 3.1.3) Run server
+#### 3.1.2) Run server
 You might need to change the file permissions using `chmod +x run_docker.sh`
 ```.bash
 ./run_docker.sh
+```
+
+#### 3.1.3) Allow access through firewall (Ubuntu)
+If you want to access the webpage from another machine.
+```.bash
+sudo ufw allow 8186
 ```
 
 #### 3.1.4) If you need to find the container's IP adress
