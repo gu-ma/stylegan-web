@@ -1,6 +1,6 @@
 # Added
 
-## 1) SG2ADA as submodule
+## 1) Link SG2ADA as submodule
 Init the submodule and link to it:
 
 ```.bash
@@ -8,29 +8,70 @@ git submodule update --init --recursive
 ln -s stylegan2-ada/dnnlib dnnlib
 ```
 
-## 2) Pyvips
-For faster image encoding. See [installation info](https://github.com/libvips/pyvips)
+## 2) SSL Certificate
 
-## 3) Docker
-
-Build the image
-```.bash
-docker build --tag styleganweb:latest .
-```
-
-Generate self signed certificate (to run locally, otherwise you can use [cerbot](https://certbot.eff.org/) to generate one)
+### 2.1) Option 1 - Generate local certificate (only work on the local machine):
 ```.bash
 openssl req -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out stylegan-web.crt -keyout stylegan-web.key
 ```
 
-Run server
+### 2.2) Option 2 - Generate local certificate with mkcert (work for network access as well):
+Install [mkcert](https://github.com/FiloSottile/mkcert/) ([Info to install Ubuntu pre-buit binaries](https://github.com/FiloSottile/mkcert/issues/369)) and generate key:
+```.bash
+mkcert -install
+mkcert 127.0.0.1
+```
+
+### 2.3) Add the certificate files path to `.env`
+```
+SSL_CERT_PATH = '<certfile>'
+SSL_KEY_PATH = '<keyfile>'
+```
+
+### 2.4) If you need to use a DN:
+Use [cerbot](https://certbot.eff.org/) to generate a certificate
+
+## 3) Run
+
+### 3.1) Option 1 - Using Docker
+
+#### 3.1.1) Build the image
+```.bash
+docker build --tag styleganweb:latest .
+```
+
+#### 3.1.2) Allow access through firewall (Ubuntu)
+```.bash
+sudo ufw allow 8186
+```
+
+#### 3.1.3) Run server
+You might need to change the file permissions using `chmod +x run_docker.sh`
 ```.bash
 ./run_docker.sh
 ```
-You might need to change the file permissions using `chmod +x run_docker.sh`
 
-## 4) Run as service (Ubuntu)
+#### 3.1.4) If you need to find the container's IP adress
+```.bash
+docker inspect --format='{{.NetworkSettings.IPAddress}}' <containe_name>
+```
 
+#### 3.1.5) Run as service (Ubuntu)
+[TBA](https://www.jetbrains.com/help/youtrack/standalone/run-docker-container-as-service.html)
+
+
+### 3.2) RUN - Option 2 - Local install (Untested)
+
+#### 3.2.1) Create env (using Conda)
+```.bash
+conda create -n stylegan2-web pip python cudnn cupti cudatoolkit=10.0 tensorflow-gpu=1.14.0
+conda activate stylegan2-web
+pip install -r
+```
+#### 3.2.2) Properly Install Pyvips
+For faster image encoding. See [installation info](https://github.com/libvips/pyvips)
+
+#### 3.2.3) Run as service (Ubuntu)
 Adjust the service file `stylegan-web.service` as needed (Environment, ExecStart, WorkingDirectory, etc...)
 Copy it to `/lib/systemd/system/`
 
